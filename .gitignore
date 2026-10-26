@@ -1,0 +1,36 @@
+.venv/
+.research/
+data/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.env
+.env.*
+!.env.example
+config.local.json
+config.*.local.json
+*.log
+node_modules/
+tools/convlog/target/
+artifacts/
+models/
+
+# Credentials, private databases and downloaded model checkpoints.
+*.pem
+*.key
+*.p12
+*.pfx
+*.sqlite
+*.sqlite3
+*.sqlite3-*
+*.db
+*.pth
+*.pt
+*.ckpt
+*.safetensors
+
+# Local editor/OS metadata.
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

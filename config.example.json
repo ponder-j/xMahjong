@@ -1,0 +1,21 @@
+{
+  "converter_command": ["docker", "run", "--rm", "-i", "xmahjong/convlog:local"],
+  "mortal": {
+    "command": [],
+    "version": "unconfigured",
+    "timeout": 120,
+    "weight_sha256": null
+  },
+  "akochan": {
+    "command": ["docker", "run", "--rm", "-i", "xmahjong/akochan:local", "mjai_log", "/dev/stdin", "{actor}"],
+    "version": "53188a0b926fbab38177f88c3cd87d554cf412af",
+    "timeout": 180
+  },
+  "temperature": 0.1,
+  "top_k": 5,
+  "llm_base_url": "http://127.0.0.1:18080/v1",
+  "llm_model": "local-qwen",
+  "llm_max_tokens": 3000,
+  "llm_assistant_prefill": "{",
+  "llm_extra_body": {}
+}

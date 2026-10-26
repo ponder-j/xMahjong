@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light"><title>XMahjong · 交叉复盘</title>
+  <link rel="stylesheet" href="/assets/style.css"><script type="module" src="/assets/app.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="XMahjong 首页"><span class="brand-tile">發</span><span>XMahjong<small>多模型交叉复盘</small></span></a>
+    <nav aria-label="系统状态"><span id="engine-status">读取引擎状态…</span><button id="settings-open" class="quiet">连接设置</button></nav>
+  </header>
+  <section class="import-bar" aria-label="导入牌谱">
+    <form id="link-form"><label for="replay-url">雀魂牌谱</label><div class="input-action"><input id="replay-url" type="url" placeholder="粘贴包含 paipu= 的雀魂牌谱链接" required><button type="submit">导入链接</button></div></form>
+    <div class="import-options"><span>或</span><label class="button secondary" for="replay-file">导入 JSON / MJAI<input id="replay-file" type="file" accept=".json,.jsonl,.mjai" hidden></label><button id="example" class="quiet">体验真实示例牌谱</button></div>
+  </section>
+  <div id="notice" role="status" aria-live="polite"></div>
+  <main class="workspace">
+    <aside class="sidebar" aria-label="牌谱与决策时间线">
+      <div class="sidebar-heading"><h2>牌谱库</h2><span id="replay-count" class="muted">本地保存</span></div>
+      <label for="library" class="sr-only">已导入牌谱</label><select id="library"><option value="">选择已导入的牌谱</option></select>
+      <label for="actor">复盘视角</label><select id="actor"><option value="0">座位 0</option><option value="1">座位 1</option><option value="2">座位 2</option><option value="3">座位 3</option></select>
+      <div class="timeline-heading"><h2>决策时间线</h2><label class="toggle"><input id="reactions" type="checkbox">含应对</label></div>
+      <div id="timeline" class="timeline"><p class="empty-small">导入牌谱后，在这里选择一巡。</p></div>
+      <p class="sidebar-note">局面只展示当时可见信息。评分保留各模型的原始尺度。</p>
+    </aside>
+    <section class="review" aria-label="局面与候选评价">
+      <div class="review-heading"><div><span id="round-label" class="round-label">等待导入牌谱</span><h1 id="turn-label">从一次选择，看懂一手牌。</h1></div><div class="step-controls"><button id="previous" class="secondary" aria-label="上一决策" disabled>‹</button><button id="next" class="secondary" aria-label="下一决策" disabled>›</button></div></div>
+      <div class="board" id="board">
+        <div class="board-watermark">交叉复盘</div><div id="board-content" class="board-content"><div class="board-empty"><span class="empty-tile">中</span><p>导入一条牌谱，回到每次决策之前。</p><small>支持四人半庄 · 雀魂链接 / 天凤6 JSON / MJAI</small></div></div>
+      </div>
+      <div class="hand-area"><div class="hand-caption"><span id="hand-label">自己的手牌</span><span id="actual" class="muted">尚未选择局面</span></div><div id="hand" class="hand"><span class="muted">每张候选弃牌都可以独立检验证据。</span></div></div>
+      <details id="hand-experiment" class="evidence-details hidden"><summary id="hand-experiment-title">额外弃牌实验</summary><pre id="hand-experiment-result"></pre></details>
+      <section class="comparison" aria-labelledby="comparison-heading">
+        <div class="section-heading"><div><h2 id="comparison-heading">候选动作对照</h2><p>任一模型 ≥1% · 非概率模型 Top-K · 实际动作</p></div><button id="analyze" disabled>分析当前局面</button></div>
+        <div id="model-messages" class="model-messages"></div>
+        <div id="disagreement" class="disagreement hidden"></div>
+        <div class="table-scroll"><table><thead><tr><th>候选动作</th><th>Mortal <small>偏好 / Q</small></th><th>Akochan <small>排名 / 原生期望值</small></th><th>向听</th><th>未见进张</th></tr></thead><tbody id="candidates"><tr><td colspan="5" class="table-empty">选择局面并分析，查看模型评价与独立证据。</td></tr></tbody></table></div>
+        <p class="data-note">偏好不是胜率。不同模型的原生分数不能相减。未见进张不是实际牌山枚数。</p>
+      </section>
+      <details class="evidence-details"><summary>查看原始证据与模型输出</summary><pre id="raw-evidence">尚无分析</pre><a id="download" class="hidden">导出原始 MJAI</a></details>
+    </section>
+    <aside class="inspector" aria-label="候选解释与追问">
+      <div class="section-heading"><h2>读懂这个选择</h2><span class="source-badge" id="explanation-source">证据优先</span></div>
+      <div id="explanation-empty" class="explanation-empty"><span class="branch-mark">↗</span><h3>不只看首选</h3><p>比较每个合理候选的速度、打点线索与安全依据，再看两个模型在哪里分歧。</p><p class="muted">未知会明确保留，不补写模型的理由。</p></div>
+      <div id="explanation-content" class="hidden"><h3 id="candidate-title"></h3><div id="candidate-reasons" class="muted"></div><div id="explanation-claims"></div><div class="effective-section"><h4>减少向听的未见进张</h4><div id="effective-tiles" class="effective-tiles"></div></div><button id="counterfactual" class="secondary full">检验这张弃牌的即时证据</button><pre id="counterfactual-result" class="hidden"></pre></div>
+      <button id="explain" class="full" disabled>生成中文 AI 解释</button><p id="llm-notice" class="data-note">解释只引用已计算的结构化证据。</p>
+      <details class="disagreement-details"><summary>模型分歧解释</summary><div id="disagreement-explanation">两个引擎均成功返回候选后进行比较。</div></details>
+      <section class="chat-section"><h2>继续追问</h2><div id="chat-log" class="chat-log" aria-live="polite"><p class="muted">例如：这张牌对哪家有安全依据？</p></div><form id="chat-form"><label for="question" class="sr-only">追问当前局面</label><textarea id="question" rows="2" placeholder="为什么这个候选进张更少？" maxlength="2000" required></textarea><button id="ask" type="submit" class="secondary full" disabled>基于当前证据追问</button></form></section>
+    </aside>
+  </main>
+  <footer>仅用于离线学习与复盘。<a href="/docs" target="_blank" rel="noreferrer">API 文档</a><span id="footer-status">模型缺失时不生成评分</span></footer>
+  <dialog id="settings"><form id="settings-form"><div class="section-heading"><h2>解释器连接</h2><button id="settings-close" type="button" class="quiet" aria-label="关闭">×</button></div><p>支持远程 OpenAI 兼容 API 和本地 llama.cpp。</p><label for="llm-url">Base URL（包含 /v1）</label><input id="llm-url" type="url" required><label for="llm-model">模型名称</label><input id="llm-model" required><label for="llm-key">API Key</label><input id="llm-key" type="password" autocomplete="off" placeholder="留空保留现有密钥"><label class="toggle"><input id="llm-thinking" type="checkbox">本机 llama.cpp Thinking 模型兼容模式</label><p class="data-note">远程 API 通常关闭兼容模式。配置保存在本机，重启后自动恢复；密钥不回显，也不写入浏览器存储。</p><div class="dialog-actions"><button type="button" id="llm-test" class="secondary">测试连接</button><button type="submit">保存连接</button></div><p id="settings-status" role="status"></p><hr><h3>麻将引擎</h3><p id="engine-config-note">引擎命令与版本在 config.local.json 配置。</p><p class="data-note">Mortal 需要自行提供训练权重。Akochan 可用项目脚本本地构建。详见 README。</p></form></dialog>
+</body>
+</html>
